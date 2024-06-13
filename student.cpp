@@ -5,55 +5,45 @@
 
 using namespace std;
 
-// ?G???j?M??`?I
-struct Node
-{
+// 二元搜尋樹節點
+struct Node {
     string data;
-    Node *left;
-    Node *right;
+    Node* left;
+    Node* right;
 };
 
-// ???s?`?I???禡
-Node *createNode(string data)
-{
-    Node *newNode = new Node();
-    if (newNode)
-    {
+// 建立新節點的函式
+Node* createNode(string data) {
+    Node* newNode = new Node();
+    if (newNode) {
         newNode->data = data;
         newNode->left = newNode->right = nullptr;
     }
     return newNode;
 }
 
-// ?N?`?I???J?G???j?M??禡
-Node *insertNode(Node *root, string data)
-{
-    // ?p?G??O????A?N?s?`?I????????`?I
-    if (root == nullptr)
-    {
+// 將節點插入二元搜尋樹的函式
+Node* insertNode(Node* root, string data) {
+    // 如果樹是空的，將新節點指派給根節點
+    if (root == nullptr) {
         root = createNode(data);
         return root;
     }
 
-    // ?_?h?A?i?滼?j???J
-    if (data < root->data)
-    {
+    // 否則，進行遞迴插入
+    if (data < root->data) {
         root->left = insertNode(root->left, data);
-    }
-    else if (data > root->data)
-    {
+    } else if (data > root->data) {
         root->right = insertNode(root->right, data);
     }
 
-    // ?^??]??????^?`?I????
+    // 回傳（不變的）節點指標
     return root;
 }
 
-// ??????M???G???j?M??禡
-void inorderTraversal(Node *root, ofstream &outputFile)
-{
-    if (root == nullptr)
-    {
+// 執行中序遍歷二元搜尋樹的函式
+void inorderTraversal(Node* root, ofstream& outputFile) {
+    if (root == nullptr) {
         return;
     }
     inorderTraversal(root->left, outputFile);
@@ -61,22 +51,20 @@ void inorderTraversal(Node *root, ofstream &outputFile)
     inorderTraversal(root->right, outputFile);
 }
 
-int main()
-{
-    // ?}???X???
+int main() {
+    // 開啟輸出檔案
     ofstream outputFile_8;
     ofstream outputFile_10;
     outputFile_8.open("student_8_index.txt");
     outputFile_10.open("student_10_index.txt");
 
-    // ???G???j?M???`?I
-    Node *root_8 = nullptr;
-    Node *root_10 = nullptr;
+    // 建立二元搜尋樹的根節點
+    Node* root_8 = nullptr;
+    Node* root_10 = nullptr;
 
-    // ????h?????
-    for (int i = 1; i <= 466; i++)
-    {
-        // ?c?y?????|
+    // 讀取多個檔案
+    for (int i = 1; i <= 466; i++) {
+        // 構造檔案路徑
         stringstream ss;
         string directoryPath;
         if (i < 10)
@@ -87,38 +75,34 @@ int main()
             ss << "data_no_cname/0" << i;
         directoryPath = ss.str();
 
-        // ?}???J???
+        // 開啟輸入檔案
         ifstream inputFile;
         inputFile.open(directoryPath);
 
-        // ?q????????????N???J?G???j?M??
+        // 從目錄中讀取檔案並將其插入二元搜尋樹
         string line;
-        while (getline(inputFile, line))
-        {
+        while (getline(inputFile, line)) {
             stringstream linestream(line);
             string student_id, course_id;
             getline(linestream, student_id, ',');
             getline(linestream, course_id, ',');
 
-            if (student_id.length() == 8 && course_id.length() == 4)
-            {
+            if (student_id.length() == 8 && course_id.length() == 4){
                 root_8 = insertNode(root_8, line);
-            }
-            else if (student_id.length() == 10 && course_id.length() == 4)
-            {
+            } else if (student_id.length() == 10 && course_id.length() == 4) {
                 root_10 = insertNode(root_10, line);
             }
         }
 
-        // ??????J???
+        // 關閉輸入檔案
         inputFile.close();
     }
 
-    // ??????M???G???j?M???N???????O?s???X????
+    // 執行中序遍歷二元搜尋樹並將排序後的資料保存到輸出檔案中
     inorderTraversal(root_8, outputFile_8);
     inorderTraversal(root_10, outputFile_10);
 
-    // ??????X???
+    // 關閉輸出檔案
     outputFile_8.close();
     outputFile_10.close();
 
