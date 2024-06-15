@@ -6,6 +6,8 @@
 #include <unordered_map>
 #include <algorithm>
 #include <cstdlib> // 用於 system 函數
+#include <codecvt> // 編碼之間進行轉換
+#include <locale>  // 控制字符和字符串的轉換
 
 using namespace std;
 
@@ -20,6 +22,7 @@ struct Node {
 struct StudentCourse {
     string student_id;
     string course_id;
+    string course_chinese;
 };
 
 // 建立新節點的函式
@@ -68,11 +71,11 @@ void readDataFromFile(vector<StudentCourse>& data, Node*& root_8, Node*& root_10
         // 構造檔案路徑
         stringstream ss;
         if (i < 10) {
-            ss << "data_no_cname/000" << i;
+            ss << "data_utf8/000" << i;
         } else if (i < 100) {
-            ss << "data_no_cname/00" << i;
+            ss << "data_utf8/00" << i;
         } else {
-            ss << "data_no_cname/0" << i;
+            ss << "data_utf8/0" << i;
         }
         string directoryPath = ss.str();
 
@@ -89,12 +92,13 @@ void readDataFromFile(vector<StudentCourse>& data, Node*& root_8, Node*& root_10
         string line;
         while (getline(inputFile, line)) {
             stringstream linestream(line);
-            string student_id, course_id;
+            string student_id, course_id, course_chinese;
             getline(linestream, student_id, ',');
             getline(linestream, course_id, ',');
+            getline(linestream, course_chinese, ',');
 
             if (!student_id.empty() && !course_id.empty()) {
-                data.push_back({student_id, course_id});
+                data.push_back({student_id, course_id, course_chinese});
             }
 
             if (student_id.length() == 8 && course_id.length() == 4){
@@ -110,15 +114,15 @@ void readDataFromFile(vector<StudentCourse>& data, Node*& root_8, Node*& root_10
 }
 
 void sortDataWithHashing(vector<StudentCourse>& data) {
-    unordered_map<string, vector<string>> courseStudentMap;
+    unordered_map<string, vector<pair<string, string>>> courseStudentMap;
 
     // 將資料插入雜湊表
     for (const auto& entry : data) {
-        courseStudentMap[entry.course_id].push_back(entry.student_id);
+        courseStudentMap[entry.course_id].push_back({entry.student_id, entry.course_chinese});
     }
 
     // 將雜湊表轉換為向量並排序
-    vector<pair<string, vector<string>>> sortedData(courseStudentMap.begin(), courseStudentMap.end());
+    vector<pair<string, vector<pair<string, string>>>> sortedData(courseStudentMap.begin(), courseStudentMap.end());
     sort(sortedData.begin(), sortedData.end(), [](const auto& a, const auto& b) {
         return a.first < b.first;
     });
@@ -126,17 +130,18 @@ void sortDataWithHashing(vector<StudentCourse>& data) {
     // 清空原來的資料並插入排序後的資料
     data.clear();
     for (const auto& entry : sortedData) {
-        vector<string> sortedStudents = entry.second;
+        vector<pair<string, string>> sortedStudents = entry.second;
         sort(sortedStudents.begin(), sortedStudents.end()); // 對學生ID進行排序
         for (const auto& student_id : sortedStudents) {
-            data.push_back({student_id, entry.first});
+            data.push_back({student_id.first, entry.first, student_id.second});
         }
     }
 }
 
 // 將排序後的資料寫入輸出檔案
 void writeDataToFile(const vector<StudentCourse>& data) {
-    ofstream outputFile("course_index.txt");
+
+    ofstream outputFile("course_index.txt", ios::out | ios::binary);
 
     // 檢查文件是否打開
     if (!outputFile.is_open()) {
@@ -146,8 +151,7 @@ void writeDataToFile(const vector<StudentCourse>& data) {
 
     // 寫入資料到輸出文件
     for (const auto& entry : data) {
-        if (entry.course_id.length() == 4)
-            outputFile << entry.course_id << "," << entry.student_id << endl;
+        outputFile << entry.course_id << "," << entry.student_id << "," << entry.course_chinese << endl;
     }
 
     // 關閉輸出檔案
