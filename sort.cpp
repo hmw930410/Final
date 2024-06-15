@@ -5,23 +5,24 @@
 #include <vector>
 #include <unordered_map>
 #include <algorithm>
+#include <cstdlib> // ç”¨æ–¼ system å‡½æ•¸
 
 using namespace std;
 
-// ¤G¤¸·j´M¾ğ¸`ÂI
+// äºŒå…ƒæœå°‹æ¨¹ç¯€é»
 struct Node {
     string data;
     Node* left;
     Node* right;
 };
 
-// ¦sÀx¾Ç¥Í©M½Òµ{¸ê®Æªºµ²ºcÅé
+// å­˜å„²å­¸ç”Ÿå’Œèª²ç¨‹è³‡æ–™çš„çµæ§‹é«”
 struct StudentCourse {
     string student_id;
     string course_id;
 };
 
-// «Ø¥ß·s¸`ÂIªº¨ç¦¡
+// å»ºç«‹æ–°ç¯€é»çš„å‡½å¼
 Node* createNode(string data) {
     Node* newNode = new Node();
     if (newNode) {
@@ -31,26 +32,26 @@ Node* createNode(string data) {
     return newNode;
 }
 
-// ±N¸`ÂI´¡¤J¤G¤¸·j´M¾ğªº¨ç¦¡
+// å°‡ç¯€é»æ’å…¥äºŒå…ƒæœå°‹æ¨¹çš„å‡½å¼
 Node* insertNode(Node* root, string data) {
-    // ¦pªG¾ğ¬OªÅªº¡A±N·s¸`ÂI«ü¬£µ¹®Ú¸`ÂI
+    // å¦‚æœæ¨¹æ˜¯ç©ºçš„ï¼Œå°‡æ–°ç¯€é»æŒ‡æ´¾çµ¦æ ¹ç¯€é»
     if (root == nullptr) {
         root = createNode(data);
         return root;
     }
 
-    // §_«h¡A¶i¦æ»¼°j´¡¤J
+    // å¦å‰‡ï¼Œé€²è¡Œéè¿´æ’å…¥
     if (data < root->data) {
         root->left = insertNode(root->left, data);
     } else if (data > root->data) {
         root->right = insertNode(root->right, data);
     }
 
-    // ¦^¶Ç¡]¤£ÅÜªº¡^¸`ÂI«ü¼Ğ
+    // å›å‚³ï¼ˆä¸è®Šçš„ï¼‰ç¯€é»æŒ‡æ¨™
     return root;
 }
 
-// °õ¦æ¤¤§Ç¹M¾ú¤G¤¸·j´M¾ğªº¨ç¦¡
+// åŸ·è¡Œä¸­åºéæ­·äºŒå…ƒæœå°‹æ¨¹çš„å‡½å¼
 void inorderTraversal(Node* root, ofstream& outputFile) {
     if (root == nullptr) {
         return;
@@ -60,11 +61,11 @@ void inorderTraversal(Node* root, ofstream& outputFile) {
     inorderTraversal(root->right, outputFile);
 }
 
-// Åª¨ú¤å¥ó¨Ã±N¸ê®Æ¦sÀx¦bvector¤¤
+// è®€å–æ–‡ä»¶ä¸¦å°‡è³‡æ–™å­˜å„²åœ¨vectorä¸­
 void readDataFromFile(vector<StudentCourse>& data, Node*& root_8, Node*& root_10) {
-    // Åª¨ú¦h­ÓÀÉ®×
+    // è®€å–å¤šå€‹æª”æ¡ˆ
     for (int i = 1; i <= 466; i++) {
-        // ºc³yÀÉ®×¸ô®|
+        // æ§‹é€ æª”æ¡ˆè·¯å¾‘
         stringstream ss;
         if (i < 10) {
             ss << "data_no_cname/000" << i;
@@ -75,16 +76,16 @@ void readDataFromFile(vector<StudentCourse>& data, Node*& root_8, Node*& root_10
         }
         string directoryPath = ss.str();
 
-        // ¶}±Ò¿é¤JÀÉ®×
+        // é–‹å•Ÿè¼¸å…¥æª”æ¡ˆ
         ifstream inputFile(directoryPath);
 
-        // ÀË¬d¤å¥ó¬O§_¥´¶}
+        // æª¢æŸ¥æ–‡ä»¶æ˜¯å¦æ‰“é–‹
         if (!inputFile.is_open()) {
-            cerr << "µLªk¥´¶}¤å¥ó: " << directoryPath << endl;
+            cerr << "ç„¡æ³•æ‰“é–‹æ–‡ä»¶: " << directoryPath << endl;
             continue;
         }
 
-        // ±q¥Ø¿ı¤¤Åª¨úÀÉ®×¨Ã±N¨ä´¡¤Jvector©M¤G¤¸·j´M¾ğ
+        // å¾ç›®éŒ„ä¸­è®€å–æª”æ¡ˆä¸¦å°‡å…¶æ’å…¥vectorå’ŒäºŒå…ƒæœå°‹æ¨¹
         string line;
         while (getline(inputFile, line)) {
             stringstream linestream(line);
@@ -103,7 +104,7 @@ void readDataFromFile(vector<StudentCourse>& data, Node*& root_8, Node*& root_10
             }
         }
 
-        // Ãö³¬¿é¤JÀÉ®×
+        // é—œé–‰è¼¸å…¥æª”æ¡ˆ
         inputFile.close();
     }
 }
@@ -111,74 +112,138 @@ void readDataFromFile(vector<StudentCourse>& data, Node*& root_8, Node*& root_10
 void sortDataWithHashing(vector<StudentCourse>& data) {
     unordered_map<string, vector<string>> courseStudentMap;
 
-    // ±N¸ê®Æ´¡¤JÂø´êªí
+    // å°‡è³‡æ–™æ’å…¥é›œæ¹Šè¡¨
     for (const auto& entry : data) {
         courseStudentMap[entry.course_id].push_back(entry.student_id);
     }
 
-    // ±NÂø´êªíÂà´«¬°¦V¶q¨Ã±Æ§Ç
+    // å°‡é›œæ¹Šè¡¨è½‰æ›ç‚ºå‘é‡ä¸¦æ’åº
     vector<pair<string, vector<string>>> sortedData(courseStudentMap.begin(), courseStudentMap.end());
     sort(sortedData.begin(), sortedData.end(), [](const auto& a, const auto& b) {
         return a.first < b.first;
     });
 
-    // ²MªÅ­ì¨Óªº¸ê®Æ¨Ã´¡¤J±Æ§Ç«áªº¸ê®Æ
+    // æ¸…ç©ºåŸä¾†çš„è³‡æ–™ä¸¦æ’å…¥æ’åºå¾Œçš„è³‡æ–™
     data.clear();
     for (const auto& entry : sortedData) {
-        for (const auto& student_id : entry.second) {
+        vector<string> sortedStudents = entry.second;
+        sort(sortedStudents.begin(), sortedStudents.end()); // å°å­¸ç”ŸIDé€²è¡Œæ’åº
+        for (const auto& student_id : sortedStudents) {
             data.push_back({student_id, entry.first});
         }
     }
 }
 
-// ±N±Æ§Ç«áªº¸ê®Æ¼g¤J¿é¥XÀÉ®×
+// å°‡æ’åºå¾Œçš„è³‡æ–™å¯«å…¥è¼¸å‡ºæª”æ¡ˆ
 void writeDataToFile(const vector<StudentCourse>& data) {
     ofstream outputFile("course_index.txt");
 
-    // ÀË¬d¤å¥ó¬O§_¥´¶}
+    // æª¢æŸ¥æ–‡ä»¶æ˜¯å¦æ‰“é–‹
     if (!outputFile.is_open()) {
         cerr << "open failed." << endl;
         return;
     }
 
-    // ¼g¤J¸ê®Æ¨ì¿é¥X¤å¥ó
+    // å¯«å…¥è³‡æ–™åˆ°è¼¸å‡ºæ–‡ä»¶
     for (const auto& entry : data) {
         if (entry.course_id.length() == 4)
             outputFile << entry.course_id << "," << entry.student_id << endl;
     }
 
-    // Ãö³¬¿é¥XÀÉ®×
+    // é—œé–‰è¼¸å‡ºæª”æ¡ˆ
+    outputFile.close();
+}
+
+// åˆ†å‰²æª”æ¡ˆçš„å‡½å¼
+void splitFile(const string& inputFileName) {
+    ifstream inputFile(inputFileName);
+    if (!inputFile.is_open()) {
+        cerr << "ç„¡æ³•æ‰“é–‹æª”æ¡ˆ " << inputFileName << endl;
+        return;
+    }
+
+    int file_part = 1;
+
+    string outputFileName;
+    if (inputFileName == "course_index.txt") {
+        outputFileName = "course/" + to_string(file_part) + ".txt";
+    }
+    else if (inputFileName == "student_8_index.txt") {
+        outputFileName = "student8/" + to_string(file_part) + ".txt";
+    }
+    else if (inputFileName == "student_10_index.txt") {
+        outputFileName = "student10/" + to_string(file_part) + ".txt";
+    }
+    
+    ofstream outputFile(outputFileName, ios::binary);
+    int bytes_written = 0;
+    string line;
+
+    while (getline(inputFile, line)) {
+        bytes_written += line.size() + 1; // åŠ ä¸Šæ›è¡Œç¬¦çš„é•·åº¦ï¼Œå› ç‚ºgetlineä¸åŒ…æ‹¬æ›è¡Œç¬¦
+        outputFile << line << '\n';
+
+        if (bytes_written >= 2000) {
+            outputFile.close();
+            file_part++;
+
+            if (inputFileName == "course_index.txt") {
+                outputFileName = "course/" + to_string(file_part) + ".txt";
+            }
+            else if (inputFileName == "student_8_index.txt") {
+                outputFileName = "student8/" + to_string(file_part) + ".txt";
+            }
+            else if (inputFileName == "student_10_index.txt") {
+                outputFileName = "student10/" + to_string(file_part) + ".txt";
+            }
+
+            outputFile.open(outputFileName, ios::binary);
+            bytes_written = 0;
+        }
+    }
+
+    inputFile.close();
     outputFile.close();
 }
 
 int main() {
-    // ¶}±Ò¿é¥XÀÉ®×
+    // é–‹å•Ÿè¼¸å‡ºæª”æ¡ˆ
     ofstream outputFile_8("student_8_index.txt");
     ofstream outputFile_10("student_10_index.txt");
 
-    // «Ø¥ß¤G¤¸·j´M¾ğªº®Ú¸`ÂI
+    // å»ºç«‹äºŒå…ƒæœå°‹æ¨¹çš„æ ¹ç¯€é»
     Node* root_8 = nullptr;
     Node* root_10 = nullptr;
 
-    // ¦sÀx¾Ç¥Í©M½Òµ{¸ê®Æªºvector
+    // å­˜å„²å­¸ç”Ÿå’Œèª²ç¨‹è³‡æ–™çš„vector
     vector<StudentCourse> data;
 
-    // ±q¤å¥ó¤¤Åª¨ú¸ê®Æ
+    // å¾æ–‡ä»¶ä¸­è®€å–è³‡æ–™
     readDataFromFile(data, root_8, root_10);
 
-    // ¨Ï¥ÎÂø´ê¨Ó±Æ§Çcourse_id
+    // ä½¿ç”¨é›œæ¹Šä¾†æ’åºcourse_id
     sortDataWithHashing(data);
 
-    // ±N±Æ§Ç«áªº¸ê®Æ¼g¤J¿é¥X¤å¥ó
+    // å°‡æ’åºå¾Œçš„è³‡æ–™å¯«å…¥è¼¸å‡ºæ–‡ä»¶
     writeDataToFile(data);
 
-    // °õ¦æ¤¤§Ç¹M¾ú¤G¤¸·j´M¾ğ¨Ã±N±Æ§Ç«áªº¸ê®Æ«O¦s¨ì¿é¥XÀÉ®×¤¤
+    // åŸ·è¡Œä¸­åºéæ­·äºŒå…ƒæœå°‹æ¨¹ä¸¦å°‡æ’åºå¾Œçš„è³‡æ–™ä¿å­˜åˆ°è¼¸å‡ºæª”æ¡ˆä¸­
     inorderTraversal(root_8, outputFile_8);
     inorderTraversal(root_10, outputFile_10);
 
-    // Ãö³¬¿é¥XÀÉ®×
+    // é—œé–‰è¼¸å‡ºæª”æ¡ˆ
     outputFile_8.close();
     outputFile_10.close();
+
+    // å‰µå»ºè³‡æ–™å¤¾
+    system("mkdir student8");
+    system("mkdir student10");
+    system("mkdir course");
+
+    // åˆ†å‰²è¼¸å‡ºæª”æ¡ˆ
+    splitFile("student_8_index.txt");
+    splitFile("student_10_index.txt");
+    splitFile("course_index.txt");
 
     return 0;
 }

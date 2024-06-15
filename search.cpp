@@ -1,131 +1,125 @@
 #include <iostream>
 #include <fstream>
+#include <string>
 #include <sstream>
-#include <vector>
-#include <unordered_map>
-#include <algorithm> // For std::sort
 
 using namespace std;
 
-// 載入索引檔案
-void loadIndex(const string& filename, unordered_multimap<string, string>& indexMap) {
-    ifstream infile(filename);
-    if (!infile.is_open()) {
-        cerr << "無法打開檔案 " << filename << endl;
-        return;
-    }
-
-    string line;
-    while (getline(infile, line)) {
-        istringstream iss(line);
-        string key, value;
-        if (getline(iss, key, ',') && getline(iss, value)) {
-            indexMap.emplace(key, value);
-        }
-    }
-    infile.close();
+// Function to check if a file exists
+bool fileExists(const string& path) {
+    ifstream file(path);
+    return file.good();
 }
 
-// 根據學號進行搜尋
+// Function to search by student ID
 void searchByStudentID(const string& studentID) {
-    unordered_multimap<string, string> indexMap;
-    string filename;
+    string folderName = (studentID.length() == 8) ? "student8" : "student10";
+    string resultFile = "result.txt";
+    int courseCount = 0;
 
-    // 根據學號長度選擇對應的檔案
-    if (studentID.length() == 8) {
-        filename = "student_8_index.txt";
-    } else if (studentID.length() == 10) {
-        filename = "student_10_index.txt";
-    } else {
-        cerr << "學號長度不正確！" << endl;
+    ofstream outputFile(resultFile);
+    if (!outputFile) {
+        cout << "Failed to open " << resultFile << " for writing." << endl;
         return;
     }
 
-    loadIndex(filename, indexMap);
+    outputFile << "Student ID: " << studentID << endl;
 
-    vector<string> results;
-    auto range = indexMap.equal_range(studentID);
-    if (range.first == range.second) {
-        results.push_back("未找到學號 " + studentID + " 的任何課程。");
-    } else {
-        for (auto it = range.first; it != range.second; ++it) {
-            results.push_back(it->second);
+    // Iterate through files in the directory
+    for (int i = 1; true; ++i) {
+        stringstream ss;
+        ss << folderName << "/" << i << ".txt";
+        string filePath = ss.str();
+        
+        if (!fileExists(filePath)) {
+            break; // No more files to process
         }
-        sort(results.begin(), results.end()); // 排序課程代碼
+        
+        ifstream inputFile(filePath);
+        if (inputFile) {
+            string line;
+            while (getline(inputFile, line)) {
+                string studentIDPrefix =(studentID.length() == 8) ? line.substr(0, 8) : line.substr(0, 10);
+                // if (folderName == "student8")
+                //     studentIDPrefix = line.substr(0, 8); // Extract the first 8 characters (student ID)
+                // else if (folderName == "student10")
+                //     studentIDPrefix = line.substr(0, 10); // Extract the first 10 characters (student ID)
+                if (studentIDPrefix == studentID) {
+                    outputFile << line << endl;
+                    courseCount++;
+                }
+            }
+            inputFile.close();
+        }
     }
 
-    ofstream outfile("result.txt");
-    if (!outfile.is_open()) {
-        cerr << "無法打開輸出檔案 result.txt" << endl;
-        return;
-    }
+    outputFile << "Total courses found: " << courseCount << endl;
 
-    outfile << "學號 " << studentID << " 的課程有: " << endl;
-    for (const auto& course : results) {
-        outfile << course << endl;
-    }
-    if (results.size() > 1) {
-        outfile << "總共有 " << results.size() << " 堂課程。" << endl;
-    }
-
-    outfile.close();
+    outputFile.close();
 }
 
-// 根據課程代碼進行搜尋
+// Function to search by course ID
 void searchByCourseID(const string& courseID) {
-    unordered_multimap<string, string> indexMap;
-    string filename = "course_index.txt";
+    string folderName = "course";
+    string resultFile = "result.txt";
+    int studentCount = 0;
 
-    loadIndex(filename, indexMap);
-
-    vector<pair<string, string>> results;
-    auto range = indexMap.equal_range(courseID);
-    if (range.first == range.second) {
-        results.push_back(make_pair("未找到課程代碼 " + courseID + " 的任何學生。", ""));
-    } else {
-        for (auto it = range.first; it != range.second; ++it) {
-            results.push_back(make_pair(it->first, it->second));
-        }
-        sort(results.begin(), results.end()); // 根據學號排序
-    }
-
-    ofstream outfile("result.txt");
-    if (!outfile.is_open()) {
-        cerr << "無法打開輸出檔案 result.txt" << endl;
+    ofstream outputFile(resultFile);
+    if (!outputFile) {
+        cout << "Failed to open " << resultFile << " for writing." << endl;
         return;
     }
 
-    outfile << "課程代碼 " << courseID << " 的學生有: " << endl;
-    for (const auto& entry : results) {
-        if (!entry.second.empty()) {
-            outfile << entry.second << endl;
+    outputFile << "Course ID: " << courseID << endl;
+
+    // Iterate through files in the directory
+    for (int i = 1; true; ++i) {
+        stringstream ss;
+        ss << folderName << "/" << i << ".txt";
+        string filePath = ss.str();
+        
+        if (!fileExists(filePath)) {
+            break; // No more files to process
+        }
+
+        ifstream inputFile(filePath);
+        if (inputFile) {
+            string line;
+            while (getline(inputFile, line)) {
+                string courseIDPrefix = line.substr(0, 4); // Extract the first four characters
+                if (courseIDPrefix == courseID) { // Compare with the given courseID
+                    outputFile << line << endl;
+                    studentCount++;
+                }
+            }
+            inputFile.close();
         }
     }
-    if (results.size() > 1) {
-        outfile << "總共有 " << results.size() << " 位學生選擇。" << endl;
-    }
 
-    outfile.close();
+    outputFile << "Total students : " << studentCount << endl;
+
+    outputFile.close();
 }
 
 int main() {
-    string option;
-    cout << endl << "1: search by student ID" << endl << "2: search by course ID" << endl;
-    cout << "Choose an option (1 or 2): ";
-    cin >> option;
+    int choice;
+    cout << "Enter 1 to search by student ID, or 2 to search by course ID: ";
+    cin >> choice;
 
-    if (option == "1") {
+    if (choice == 1) {
         string studentID;
         cout << "Enter student ID: ";
         cin >> studentID;
         searchByStudentID(studentID);
-    } else if (option == "2") {
+    }
+    else if (choice == 2) {
         string courseID;
         cout << "Enter course ID: ";
         cin >> courseID;
         searchByCourseID(courseID);
-    } else {
-        cout << "Invalid option." << endl;
+    }
+    else {
+        cout << "Invalid choice." << endl;
     }
 
     return 0;
