@@ -103,7 +103,7 @@ void searchByCourseID(const string &courseID)
                 stringstream ss(line);
                 string token;
                 string courseIDPrefix;
-                string courseChinese;
+                string courseNamePrefix;
                 string studentID;
                 int i = 0;
                 while (getline(ss, token, ','))
@@ -113,14 +113,14 @@ void searchByCourseID(const string &courseID)
                     else if (i == 1)
                         studentID = token;
                     else if (i == 2)
-                        courseChinese = token;
+                        courseNamePrefix = token;
                     else
                         cout << "分割錯誤" << endl;
                     i++;
                 }
                 if (courseIDPrefix == courseID && flag)
                 {
-                    outputFile << "Course Name: " << courseChinese << endl;
+                    outputFile << "Course Name: " << courseNamePrefix << endl;
                     flag = 0;
                 }
                 if (courseIDPrefix == courseID)
@@ -138,10 +138,80 @@ void searchByCourseID(const string &courseID)
     outputFile.close();
 }
 
+void searchByCourseName(const string &courseName)
+{
+    string folderName = "chineseName";
+    string resultFile = "result.txt";
+    int studentCount = 0;
+
+    ofstream outputFile(resultFile);
+    if (!outputFile)
+    {
+        cout << "Failed to open " << resultFile << " for writing." << endl;
+        return;
+    }
+
+    outputFile << "Course Name: " << courseName << endl;
+    int flag = 1;
+    // Iterate through files in the directory
+    for (int i = 1; true; ++i)
+    {
+        stringstream ss;
+        ss << folderName << "/" << i << ".txt";
+        string filePath = ss.str();
+
+        if (!fileExists(filePath))
+        {
+            break; // No more files to process
+        }
+        ifstream inputFile(filePath);
+        if (inputFile)
+        {
+            string line;
+            while (getline(inputFile, line))
+            {
+                stringstream ss(line);
+                string token;
+                string courseIDPrefix;
+                string courseNamePrefix;
+                string studentID;
+                int i = 0;
+                while (getline(ss, token, ','))
+                {
+                    if (i == 0)
+                        courseIDPrefix = token;
+                    else if (i == 1)
+                        studentID = token;
+                    else if (i == 2)
+                        courseNamePrefix = token;
+                    else
+                        cout << "分割錯誤" << endl;
+                    i++;
+                }
+                if (courseNamePrefix == courseName && flag)
+                {
+                    outputFile << "Course ID: " << courseIDPrefix << endl;
+                    flag = 0;
+                }
+                if (courseNamePrefix == courseName)
+                { // Compare with the given courseID
+                    outputFile << studentID << endl;
+                    studentCount++;
+                }
+            }
+            inputFile.close();
+        }
+    }
+
+    outputFile << "Total students : " << studentCount << endl;
+
+    outputFile.close();
+}
+
 int main()
 {
     int choice;
-    cout << "Enter 1 to search by student ID, or 2 to search by course ID: ";
+    cout << "Enter 1 to search by student ID, 2 to search by course ID, or 3 to search by course Name(chinese): ";
     cin >> choice;
 
     if (choice == 1)
@@ -157,6 +227,13 @@ int main()
         cout << "Enter course ID: ";
         cin >> courseID;
         searchByCourseID(courseID);
+    }
+    else if (choice == 3)
+    {
+        string courseName;
+        cout << "Enter course ID: ";
+        cin >> courseName;
+        searchByCourseName(courseName);
     }
     else
     {
